@@ -38,6 +38,13 @@ jobs:
                 cd build
                 cmake -GNinja ${{ matrix.flags }} ..
                 cmake --build .
+
+          - name: Upload a Build Artifact
+            uses: actions/upload-artifact@v5.0.0
+            with:
+              name: linux-${{ matrix.name }}-build
+              path: build/reminecraftpe
+
     wasm:
         name: WASM
         runs-on: ubuntu-latest
@@ -166,3 +173,9 @@ jobs:
                 cd build
                 cmake -GNinja -DCMAKE_TOOLCHAIN_FILE=../cmake/mingw-w64-toolchain.cmake ${{ matrix.flags }} ..
                 cmake --build .
+
+          - name: Upload a Build Artifact
+            uses: actions/upload-artifact@v5.0.0
+            with:
+              name: mingw-${{ matrix.name }}-build
+              path: build/reminecraftpe*
