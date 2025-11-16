@@ -142,6 +142,13 @@ jobs:
             run: |
                 cd ${{ matrix.directory }}
                 ./gradlew build
+          - name: find apk
+            run: find . -type f -name "*.apk" -exec cp {} . \;
+          - name: Upload APK Artifact
+            uses: actions/upload-artifact@v5
+            with:
+              name: vlc-android-apk
+              path: ./*.apk
     mingw:
         strategy:
             fail-fast: false
