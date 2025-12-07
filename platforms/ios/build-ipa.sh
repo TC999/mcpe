@@ -12,7 +12,7 @@ platformdir='platforms/ios'
 builddir="$platformdir/build"
 assetdir='game/assets'
 ipadir="$builddir/ipa"
-apppath="$builddir/$ipadir/Payload/ReMCPE.app"
+apppath="$ipadir/Payload/ReMCPE.app"
 
 [ "${0%/*}" = "$0" ] && scriptroot="." || scriptroot="${0%/*}"
 cd "$scriptroot/../.."
@@ -31,29 +31,18 @@ fi
 rm -rf "$ipadir"
 mkdir -p "$apppath"
 cp "build/$bin" "$apppath/$execname"
-sed -E -e "s|\$\{EXECUTABLE_NAME\}|$execname|" -e "s|\$\{PRODUCT_NAME(:rfc1034identifier)?\}|$execname|g" "$platformdir/minecraftpe-Info.plist" |
+sed -E -e "s|\\\$\{EXECUTABLE_NAME\}|$execname|" -e "s|\\\$\{PRODUCT_NAME(:rfc1034identifier)?\}|$execname|g" "$platformdir/minecraftpe-Info.plist" |
     plistutil -o "$apppath/Info.plist" -f bin
-cd "$assetdir"
-apppath="../../$apppath"
-if [ -f font/default.png ]; then
-    cp font/default.png "$apppath/default8.png"
-elif [ -f font/default8.png ]; then
-    cp font/default8.png "$apppath/default8.png"
-fi
-cp icon.png "$apppath/Icon.png" || true
+cp "$assetdir/icon.png" "$apppath/Icon.png" || true
 cp -a \
-    "../../$platformdir/precompiled"/* \
-    gui/*.png \
-    mob/* \
-    item/* \
-    sound/* \
-    sounds/random/* \
-    app/launch/* \
-    patches/* \
-    terrain.png \
-    particles.png \
+    "$platformdir/precompiled"/* \
+    "$assetdir" \
     "$apppath" || true
-cd "../../$ipadir"
+[ -f "$apppath/assets/font/default.png" ] && mv "$apppath/assets/font/default.png" "$apppath/assets/font/default8.png"
+mv "$apppath/assets/app/launch"/* "$apppath"
+rm -rf "$apppath/assets/app"
+find "$apppath" -name .gitignore -delete
+cd "$ipadir"
 rm -f "../$ipaname"
 zip -r "../$ipaname" Payload
 
