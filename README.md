@@ -21,7 +21,7 @@ The code is based on a decompilation of Minecraft: Pocket Edition (v0.1.3) as of
 	* Linux
 	* WebGL
 	* macOS (10.4 and above; thanks to [BrentDaMage](https://github.com/BrentDaMage))
-	* iOS (3.0 and above; thanks to [BrentDaMage](https://github.com/BrentDaMage))
+	* iOS (3.1 and above; thanks to [BrentDaMage](https://github.com/BrentDaMage))
 	* HaikuOS (thanks to [SanyaSho](https://github.com/SanyaSho))
 
 **We will not do the following:**
@@ -168,7 +168,6 @@ To build, perform the same steps as on Linux.
 I've had texture seams when playing Minecraft Classic, ClassiCube and this recreation of Minecraft PE, on a
 fresh new laptop. If seams bother you, and you are using an NVIDIA graphics card, go to the NVIDIA Control
 Panel, then in "Manage 3D Settings", change "Antialiasing - Mode" to "Application Controlled".
-a custom script which downloads and sets up all assets needed for the game.
 
 ## Screenshots (from the decomp)
 
