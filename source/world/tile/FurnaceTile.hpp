@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Tile.hpp"
-#include "world/item/ItemStack.hpp"
 
 class FurnaceTile : public Tile
 {

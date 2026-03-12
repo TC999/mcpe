@@ -6,7 +6,6 @@
 #include "screens/inventory/CraftingScreen.hpp"
 #include "screens/inventory/ChestScreen.hpp"
 #include "screens/inventory/FurnaceScreen.hpp"
-#include "world/tile/FurnaceTile.hpp"
 #include "screens/OptionsScreen.hpp"
 #include "screens/OptionsScreen_Console.hpp"
 #include "screens/CreateWorldScreen.hpp"

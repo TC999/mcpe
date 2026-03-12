@@ -1,20 +1,8 @@
-/********************************************************************
-	Minecraft: Pocket Edition - Decompilation Project
-	Copyright (C) 2023 iProgramInCpp
-
-	The following code is licensed under the BSD 1 clause license.
-	SPDX-License-Identifier: BSD-1-Clause
- ********************************************************************/
-
 #include "FurnaceTile.hpp"
 #include "world/level/Level.hpp"
-#include "world/entity/Player.hpp"
-#include "world/entity/Mob.hpp"
-#include "world/entity/EntityItem.hpp"
 #include "world/phys/Vec3.hpp"
 #include "world/Facing.hpp"
 #include "world/inventory/FurnaceMenu.hpp"
-#include "world/item/ItemStack.hpp"
 #include "world/item/crafting/FurnaceRecipes.hpp"
 
 FurnaceTile::FurnaceTile(TileID id, bool isActive) : Tile(id, Material::stone)
