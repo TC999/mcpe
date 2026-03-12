@@ -22,8 +22,9 @@ public:
     virtual void pushOptionsScreen(Screen*);
     virtual void pushProgressScreen();
     virtual void pushCraftingScreen(Player*, const TilePos&); // originally pushWorkbenchScreen
-    virtual void pushChestScreen(Player*, Container*);
-    virtual void pushCreditsScreen(Screen*);
+	virtual void pushChestScreen(Player*, Container*);
+	virtual void pushFurnaceScreen(Player*, FurnaceTile*);
+	virtual void pushCreditsScreen(Screen*);
 
     static ScreenChooser* Create(Minecraft*);
 
