@@ -30,11 +30,13 @@ FurnaceTile::FurnaceTile(TileID id, bool isActive) : Tile(id, Material::stone)
 
 bool FurnaceTile::use(Level* level, const TilePos& pos, Player* player)
 {
-    (void)pos;
     if (level->m_bIsClientSide)
     {
         return true;
     }
+
+    // Ensure existing furnaces start processing immediately after interaction.
+    level->addToTickNextTick(pos, level->getTile(pos), getTickDelay());
 
     player->openFurnace(this);
     return true;
