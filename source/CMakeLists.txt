@@ -446,7 +446,7 @@ add_library(nbcraft-core STATIC
     world/tile/Web.cpp
     world/tile/FenceTile.cpp
     world/tile/CraftingTableTile.cpp
-    world/tile/FurnaceTile.cpp
+    # world/tile/FurnaceTile.cpp # Incomplete port; not registered in Tile.cpp
     renderer/GL/GL.cpp
     renderer/Attribute.cpp
     renderer/ConstantBufferMetaData.cpp

@@ -7,6 +7,7 @@ class Player;
 class Minecraft;
 class Container;
 class Screen;
+class FurnaceTile;
 
 //@NOTE: This is just based on MCPE, not really a decompilation, make it accurate if necessary
 class ScreenChooser
