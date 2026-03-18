@@ -71,10 +71,16 @@ int FurnaceTile::getTexture(const LevelSource* level, const TilePos& pos, Facing
     return m_isActive ? TEXTURE_FURNACE_LIT : TEXTURE_FURNACE_FRONT;
 }
 
+int FurnaceTile::getTickDelay() const
+{
+    return 10;
+}
+
 void FurnaceTile::onPlace(Level* level, const TilePos& pos)
 {
     Tile::onPlace(level, pos);
     setDefaultDirection(level, pos);
+    level->addToTickNextTick(pos, m_ID, getTickDelay());
 }
 
 void FurnaceTile::setDefaultDirection(Level* level, const TilePos& pos)
@@ -205,6 +211,7 @@ void FurnaceTile::onRemove(Level* level, const TilePos& pos)
 
 void FurnaceTile::tick(Level* level, const TilePos& pos, Random* random)
 {
+    (void)random;
     bool wasBurning = isBurning();
     bool shouldUpdate = false;
     if (isBurning())
@@ -252,6 +259,12 @@ void FurnaceTile::tick(Level* level, const TilePos& pos, Random* random)
     if (shouldUpdate)
     {
         level->setTilesDirty(pos, pos);
+    }
+
+    TileID tile = level->getTile(pos);
+    if (tile == Tile::furnaceIdle->m_ID || tile == Tile::furnaceActive->m_ID)
+    {
+        level->addToTickNextTick(pos, tile, getTickDelay());
     }
 }
 

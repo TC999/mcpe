@@ -12,6 +12,7 @@ public:
     bool use(Level*, const TilePos& pos, Player*) override;
     int getTexture(Facing::Name face) const override;
     int getTexture(const LevelSource*, const TilePos& pos, Facing::Name face) const override;
+    int getTickDelay() const override;
     void onPlace(Level*, const TilePos& pos) override;
     void onRemove(Level*, const TilePos& pos) override;
     void randomDisplayTick(Level*, const TilePos& pos, Random*) override;
