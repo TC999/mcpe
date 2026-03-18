@@ -73,7 +73,8 @@ int FurnaceTile::getTexture(const LevelSource* level, const TilePos& pos, Facing
 
 int FurnaceTile::getTickDelay() const
 {
-    return 10;
+    // Run furnace logic on the next world tick so ignition feels immediate.
+    return 1;
 }
 
 void FurnaceTile::onPlace(Level* level, const TilePos& pos)
