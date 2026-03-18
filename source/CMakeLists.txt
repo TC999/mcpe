@@ -126,6 +126,7 @@ add_library(nbcraft-core STATIC
     client/gui/screens/inventory/CraftingScreen.cpp
     client/gui/screens/inventory/ClassicCraftingScreen_Console.cpp
     client/gui/screens/inventory/ChestScreen.cpp
+    client/gui/screens/inventory/FurnaceScreen.cpp
     client/gui/components/ScrolledSelectionList.cpp
     client/gui/components/AvailableGamesList.cpp
     client/gui/components/RolledSelectionList.cpp
@@ -364,8 +365,10 @@ add_library(nbcraft-core STATIC
     world/inventory/InventoryMenu.cpp
     world/inventory/CraftingMenu.cpp
     world/inventory/ChestMenu.cpp
+    world/inventory/FurnaceMenu.cpp
     world/inventory/Slot.cpp
     world/inventory/ResultSlot.cpp
+    world/inventory/FurnaceResultSlot.cpp
     world/inventory/ArmorSlot.cpp
     world/inventory/CraftingContainer.cpp
     world/inventory/ResultContainer.cpp
@@ -446,7 +449,7 @@ add_library(nbcraft-core STATIC
     world/tile/Web.cpp
     world/tile/FenceTile.cpp
     world/tile/CraftingTableTile.cpp
-    # world/tile/FurnaceTile.cpp # Incomplete port; not registered in Tile.cpp
+    world/tile/FurnaceTile.cpp
     renderer/GL/GL.cpp
     renderer/Attribute.cpp
     renderer/ConstantBufferMetaData.cpp

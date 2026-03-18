@@ -240,6 +240,9 @@ public: // static variables
 		* glowstone,
 		* web,
 		* fence,
+		*furnace,
+		*furnaceIdle,
+		*furnaceActive,
 		* craftingTable,
 		* crops;
 

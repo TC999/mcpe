@@ -8,11 +8,11 @@ class FurnaceScreen : public ContainerScreen
 {
 public:
     FurnaceScreen(Inventory* playerInventory, FurnaceTile* furnace);
-    ~FurnaceScreen();
 
 protected:
-    void renderBg(float partialTicks, int x, int y) override;
-    void renderLabels() override;
+    void _renderLabels() override;
+    void _renderBg(float partialTick) override;
+    SlotDisplay _createSlotDisplay(const Slot&) override;
 
 private:
     FurnaceTile* m_furnace;

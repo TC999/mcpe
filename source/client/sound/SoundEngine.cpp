@@ -133,7 +133,8 @@ void SoundEngine::forcePlayMusic()
 
 void SoundEngine::updateListener(const Mob* player, float elapsedTime)
 {
-	  assert(m_pSoundSystem->isAvailable());
+    if (!m_pSoundSystem->isAvailable())
+        return;
 
     if (m_pOptions->m_masterVolume.get() > 0.0f)
     {
@@ -153,7 +154,8 @@ void SoundEngine::updateListener(const Mob* player, float elapsedTime)
 
 void SoundEngine::update()
 {
-    assert(m_pSoundSystem->isAvailable());
+    if (!m_pSoundSystem->isAvailable())
+        return;
     m_pSoundSystem->update();
 }
 

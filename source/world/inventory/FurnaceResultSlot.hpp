@@ -8,11 +8,11 @@ class FurnaceTile;
 class FurnaceResultSlot : public Slot
 {
 public:
-    FurnaceResultSlot(FurnaceMenu* menu, FurnaceTile* furnace, int index, int x, int y);
+    FurnaceResultSlot(FurnaceMenu* menu, FurnaceTile* furnace, int index);
     ~FurnaceResultSlot();
 
 public:
-    bool isItemValid(const ItemStack& item) const override;
+    bool mayPlace(const ItemStack& item) const override;
     void onTake(ItemStack& item) override;
 
 private:

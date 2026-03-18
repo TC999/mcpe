@@ -55,7 +55,7 @@
 #include "RocketLauncherTile.hpp"
 //#include "RedStoneDustTile.hpp"
 #include "CraftingTableTile.hpp"
-//#include "FurnaceTile.hpp"
+#include "FurnaceTile.hpp"
 #include "TallGrass.hpp"
 #include "DeadBush.hpp"
 //#include "Fern.hpp"
@@ -774,6 +774,21 @@ void Tile::initTiles()
 		->setSoundType(Tile::SOUND_CLOTH)
 		->setDescriptionId("web");
 
+	Tile::furnace = (new FurnaceTile(TILE_FURNACE, false))
+		->init()
+		->setDestroyTime(3.5f)
+		->setSoundType(Tile::SOUND_STONE)
+		->setDescriptionId("furnace");
+
+	Tile::furnaceIdle = Tile::furnace;
+
+	Tile::furnaceActive = (new FurnaceTile(TILE_FURNACE_LIT, true))
+		->init()
+		->setDestroyTime(3.5f)
+		->setLightEmission(0.875f)
+		->setSoundType(Tile::SOUND_STONE)
+		->setDescriptionId("furnace");
+
 	Tile::craftingTable = (new CraftingTableTile(TILE_WORKBENCH))
 		->init()
 		->setDestroyTime(2.5f)
@@ -1278,5 +1293,8 @@ Tile
 	*Tile::glowstone,
 	*Tile::web,
 	*Tile::fence,
+	*Tile::furnace,
+	*Tile::furnaceIdle,
+	*Tile::furnaceActive,
 	*Tile::craftingTable,
 	*Tile::crops;

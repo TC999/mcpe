@@ -5,7 +5,7 @@
 #include "screens/PauseScreen.hpp"
 #include "screens/inventory/CraftingScreen.hpp"
 #include "screens/inventory/ChestScreen.hpp"
-#include "screens/inventory/InventoryScreen.hpp"
+#include "screens/inventory/FurnaceScreen.hpp"
 #include "screens/OptionsScreen.hpp"
 #include "screens/OptionsScreen_Console.hpp"
 #include "screens/CreateWorldScreen.hpp"
@@ -61,8 +61,7 @@ void ScreenChooser::pushChestScreen(Player* player, Container* container)
 
 void ScreenChooser::pushFurnaceScreen(Player* player, FurnaceTile* furnace)
 {
-	(void)furnace;
-	m_pMinecraft->setScreen(new InventoryScreen(player));
+	m_pMinecraft->setScreen(new FurnaceScreen(player->m_pInventory, furnace));
 }
 
 void ScreenChooser::pushCreditsScreen(Screen* parent)

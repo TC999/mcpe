@@ -1,8 +1,9 @@
 #pragma once
 
 #include "Tile.hpp"
+#include "world/Container.hpp"
 
-class FurnaceTile : public Tile
+class FurnaceTile : public Tile, public Container
 {
 public:
     FurnaceTile(TileID id, bool isActive);
@@ -24,12 +25,17 @@ public:
     static void updateFurnaceBlockState(bool isBurning, Level* level, const TilePos& pos);
 
     // Inventory methods
-    uint16_t getContainerSize() const;
-    ItemStack& getItem(int index);
-    ItemStack removeItem(int index, int count);
-    void setItem(int index, const ItemStack& item);
-    std::string getName() const;
-    bool stillValid(Player* player) const;
+    uint16_t getContainerSize() const override;
+    ItemStack& getItem(int index) override;
+    ItemStack removeItem(int index, int count) override;
+    void setItem(int index, const ItemStack& item) override;
+    std::string getName() const override;
+    void setChanged() override;
+    bool stillValid(Player* player) const override;
+
+    int getCookTime() const { return m_cookTime; }
+    int getBurnTime() const { return m_burnTime; }
+    int getCurrentItemBurnTime() const { return m_currentItemBurnTime; }
 
     // Furnace methods
     bool isBurning() const;

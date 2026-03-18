@@ -7,7 +7,7 @@ class FurnaceMenu : public ContainerMenu
 {
 public:
     FurnaceMenu(FurnaceTile* furnace, Inventory* playerInventory);
-    ~FurnaceMenu();
+    ~FurnaceMenu() override;
 
 public:
     bool stillValid(Player* player) const override;

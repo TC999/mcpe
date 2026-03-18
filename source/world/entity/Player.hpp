@@ -18,6 +18,7 @@
 #define C_PLAYER_FLAG_USING_ITEM (4)
 
 class Inventory; // in case we're included from Inventory.hpp
+class FurnaceTile;
 
 class Player : public Mob
 {
@@ -72,7 +73,7 @@ public:
 	virtual void startStonecutting(const TilePos& pos);
 	virtual void startDestroying();
 	virtual void stopDestroying();
-	//virtual void openFurnace(FurnaceTileEntity* tileEntity);
+	virtual void openFurnace(FurnaceTile* furnace) {}
 	virtual void openContainer(Container* container) {}
 	virtual void closeContainer() {}
 	//virtual void openTrap(DispenserTileEntity* tileEntity);

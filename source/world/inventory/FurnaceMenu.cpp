@@ -3,6 +3,7 @@
 #include "world/item/Inventory.hpp"
 #include "world/inventory/Slot.hpp"
 #include "world/inventory/FurnaceResultSlot.hpp"
+#include "world/item/crafting/FurnaceRecipes.hpp"
 
 FurnaceMenu::FurnaceMenu(FurnaceTile* furnace, Inventory* playerInventory) : ContainerMenu(Container::FURNACE)
 {
@@ -12,23 +13,23 @@ FurnaceMenu::FurnaceMenu(FurnaceTile* furnace, Inventory* playerInventory) : Con
     m_currentItemBurnTime = 0;
 
     // Add furnace slots
-    addSlot(new Slot(furnace, 0, 56, 17)); // Input slot
-    addSlot(new Slot(furnace, 1, 56, 53)); // Fuel slot
-    addSlot(new FurnaceResultSlot(this, furnace, 2, 116, 35)); // Output slot
+    addSlot(new Slot(furnace, 0, Slot::INPUT));
+    addSlot(new Slot(furnace, 1, Slot::INPUT));
+    addSlot(new FurnaceResultSlot(this, furnace, 2));
 
     // Add player inventory slots
     for (int i = 0; i < 3; i++)
     {
         for (int j = 0; j < 9; j++)
         {
-            addSlot(new Slot(playerInventory, j + i * 9 + 9, 8 + j * 18, 84 + i * 18));
+            addSlot(new Slot(playerInventory, j + i * 9 + 9, Slot::INVENTORY));
         }
     }
 
     // Add player hotbar slots
     for (int i = 0; i < 9; i++)
     {
-        addSlot(new Slot(playerInventory, i, 8 + i * 18, 142));
+        addSlot(new Slot(playerInventory, i, Slot::HOTBAR));
     }
 }
 
@@ -44,72 +45,84 @@ bool FurnaceMenu::stillValid(Player* player) const
 ItemStack FurnaceMenu::quickMoveStack(int index)
 {
     ItemStack itemstack = ItemStack::EMPTY;
-    Slot* slot = m_slots[index];
+    Slot* slot = getSlot(index);
     if (slot && slot->hasItem())
     {
-        ItemStack itemstack1 = slot->getItem();
-        itemstack = itemstack1.copy();
+        ItemStack& itemstack1 = slot->getItem();
+        itemstack = itemstack1;
         if (index == 2) // Output slot
         {
-            if (!moveItemStackTo(itemstack1, 3, 39, true))
+            moveItemStackTo(itemstack1, 3, 39, true);
+        }
+        else if (index == 0 || index == 1)
+        {
+            moveItemStackTo(itemstack1, 3, 39, false);
+        }
+        else if (index >= 3 && index < 39)
+        {
+            if (FurnaceRecipes::singleton().isFurnaceItem(itemstack1))
             {
-                return ItemStack::EMPTY;
+                moveItemStackTo(itemstack1, 0, 1, false);
+            }
+            else if (FurnaceRecipes::singleton().getBurnDuration(itemstack1) > 0)
+            {
+                moveItemStackTo(itemstack1, 1, 2, false);
+            }
+            else if (index >= 3 && index < 30)
+            {
+                moveItemStackTo(itemstack1, 30, 39, false);
+            }
+            else if (index >= 30 && index < 39)
+            {
+                moveItemStackTo(itemstack1, 3, 30, false);
             }
         }
-        else if (index >= 3 && index < 30) // Player inventory
+        else
         {
-            if (!moveItemStackTo(itemstack1, 0, 2, false))
-            {
-                if (!moveItemStackTo(itemstack1, 30, 39, false))
-                {
-                    return ItemStack::EMPTY;
-                }
-            }
+            moveItemStackTo(itemstack1, 3, 39, false);
         }
-        else if (index >= 30 && index < 39) // Player hotbar
-        {
-            if (!moveItemStackTo(itemstack1, 0, 2, false))
-            {
-                if (!moveItemStackTo(itemstack1, 3, 30, false))
-                {
-                    return ItemStack::EMPTY;
-                }
-            }
-        }
-        else if (!moveItemStackTo(itemstack1, 3, 39, false))
-        {
-            return ItemStack::EMPTY;
-        }
+
         if (itemstack1.isEmpty())
         {
             slot->set(ItemStack::EMPTY);
         }
         else
         {
-            slot->onSlotChanged();
+            slot->setChanged();
         }
-        if (itemstack1.getCount() == itemstack.getCount())
+
+        if (itemstack1.m_count == itemstack.m_count)
         {
             return ItemStack::EMPTY;
         }
-        slot->onTake(itemstack1);
+
+        slot->onTake(itemstack);
     }
+
     return itemstack;
 }
 
 void FurnaceMenu::slotsChanged(Container* container)
 {
     ContainerMenu::slotsChanged(container);
+
     if (container == m_furnace)
     {
-        for (int i = 0; i < m_listeners.size(); i++)
+        if (m_cookTime != m_furnace->getCookTime())
         {
-            m_listeners[i]->containerChanged(this, 0, m_furnace->m_cookTime);
-            m_listeners[i]->containerChanged(this, 1, m_furnace->m_burnTime);
-            m_listeners[i]->containerChanged(this, 2, m_furnace->m_currentItemBurnTime);
+            sendData(0, m_furnace->getCookTime());
         }
-        m_cookTime = m_furnace->m_cookTime;
-        m_burnTime = m_furnace->m_burnTime;
-        m_currentItemBurnTime = m_furnace->m_currentItemBurnTime;
+        if (m_burnTime != m_furnace->getBurnTime())
+        {
+            sendData(1, m_furnace->getBurnTime());
+        }
+        if (m_currentItemBurnTime != m_furnace->getCurrentItemBurnTime())
+        {
+            sendData(2, m_furnace->getCurrentItemBurnTime());
+        }
+
+        m_cookTime = m_furnace->getCookTime();
+        m_burnTime = m_furnace->getBurnTime();
+        m_currentItemBurnTime = m_furnace->getCurrentItemBurnTime();
     }
 }

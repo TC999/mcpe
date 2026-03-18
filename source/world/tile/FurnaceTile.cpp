@@ -2,8 +2,9 @@
 #include "world/level/Level.hpp"
 #include "world/phys/Vec3.hpp"
 #include "world/Facing.hpp"
-#include "world/inventory/FurnaceMenu.hpp"
 #include "world/item/crafting/FurnaceRecipes.hpp"
+#include "world/entity/ItemEntity.hpp"
+#include "world/entity/Player.hpp"
 
 FurnaceTile::FurnaceTile(TileID id, bool isActive) : Tile(id, Material::stone)
 {
@@ -29,52 +30,45 @@ FurnaceTile::FurnaceTile(TileID id, bool isActive) : Tile(id, Material::stone)
 
 bool FurnaceTile::use(Level* level, const TilePos& pos, Player* player)
 {
-    if (level->isClientSide())
+    (void)pos;
+    if (level->m_bIsClientSide)
     {
         return true;
     }
-    else
-    {
-        player->displayGUIFurnace(pos);
-        return true;
-    }
+
+    player->openFurnace(this);
+    return true;
 }
 
 int FurnaceTile::getTexture(Facing::Name face) const
 {
-    if (face == Facing::TOP || face == Facing::BOTTOM)
+    if (face == Facing::UP || face == Facing::DOWN)
     {
-        return 45 + 17;
+        return TEXTURE_FURNACE_TOP;
     }
+
     if (face == Facing::NORTH)
     {
-        return 45 - 1;
+        return m_isActive ? TEXTURE_FURNACE_LIT : TEXTURE_FURNACE_FRONT;
     }
-    else
-    {
-        return 45;
-    }
+
+    return TEXTURE_FURNACE_SIDE;
 }
 
 int FurnaceTile::getTexture(const LevelSource* level, const TilePos& pos, Facing::Name face) const
 {
-    if (face == Facing::TOP || face == Facing::BOTTOM)
+    if (face == Facing::UP || face == Facing::DOWN)
     {
-        return 45 + 17;
+        return TEXTURE_FURNACE_TOP;
     }
+
     int meta = level->getData(pos);
     if (face != (Facing::Name)meta)
     {
-        return 45;
+        return TEXTURE_FURNACE_SIDE;
     }
-    if (m_isActive)
-    {
-        return 45 + 16;
-    }
-    else
-    {
-        return 45 - 1;
-    }
+
+    return m_isActive ? TEXTURE_FURNACE_LIT : TEXTURE_FURNACE_FRONT;
 }
 
 void FurnaceTile::onPlace(Level* level, const TilePos& pos)
@@ -85,31 +79,34 @@ void FurnaceTile::onPlace(Level* level, const TilePos& pos)
 
 void FurnaceTile::setDefaultDirection(Level* level, const TilePos& pos)
 {
-    if (level->isClientSide())
+    if (level->m_bIsClientSide)
     {
         return;
     }
-    int north = level->getTile(pos.add(0, 0, -1)).m_ID;
-    int south = level->getTile(pos.add(0, 0, 1)).m_ID;
-    int west = level->getTile(pos.add(-1, 0, 0)).m_ID;
-    int east = level->getTile(pos.add(1, 0, 0)).m_ID;
-    byte direction = 3; // North
+
+    TileID north = level->getTile(pos.north());
+    TileID south = level->getTile(pos.south());
+    TileID west = level->getTile(pos.west());
+    TileID east = level->getTile(pos.east());
+    int direction = Facing::NORTH;
+
     if (Tile::solid[north] && !Tile::solid[south])
     {
-        direction = 3;
+        direction = Facing::NORTH;
     }
     if (Tile::solid[south] && !Tile::solid[north])
     {
-        direction = 2;
+        direction = Facing::SOUTH;
     }
     if (Tile::solid[west] && !Tile::solid[east])
     {
-        direction = 5;
+        direction = Facing::WEST;
     }
     if (Tile::solid[east] && !Tile::solid[west])
     {
-        direction = 4;
+        direction = Facing::EAST;
     }
+
     level->setData(pos, direction);
 }
 
@@ -125,31 +122,36 @@ void FurnaceTile::randomDisplayTick(Level* level, const TilePos& pos, Random* ra
     float z = (float)pos.z + 0.5f;
     float f3 = 0.52f;
     float f4 = random->nextFloat() * 0.6f - 0.3f;
+
     if (meta == 4) // East
     {
-        level->addParticle("smoke", x - f3, y, z + f4, 0.0f, 0.0f, 0.0f);
-        level->addParticle("flame", x - f3, y, z + f4, 0.0f, 0.0f, 0.0f);
+        Vec3 part(x - f3, y, z + f4);
+        level->addParticle("smoke", part);
+        level->addParticle("flame", part);
     }
     else if (meta == 5) // West
     {
-        level->addParticle("smoke", x + f3, y, z + f4, 0.0f, 0.0f, 0.0f);
-        level->addParticle("flame", x + f3, y, z + f4, 0.0f, 0.0f, 0.0f);
+        Vec3 part(x + f3, y, z + f4);
+        level->addParticle("smoke", part);
+        level->addParticle("flame", part);
     }
     else if (meta == 2) // South
     {
-        level->addParticle("smoke", x + f4, y, z - f3, 0.0f, 0.0f, 0.0f);
-        level->addParticle("flame", x + f4, y, z - f3, 0.0f, 0.0f, 0.0f);
+        Vec3 part(x + f4, y, z - f3);
+        level->addParticle("smoke", part);
+        level->addParticle("flame", part);
     }
     else if (meta == 3) // North
     {
-        level->addParticle("smoke", x + f4, y, z + f3, 0.0f, 0.0f, 0.0f);
-        level->addParticle("flame", x + f4, y, z + f3, 0.0f, 0.0f, 0.0f);
+        Vec3 part(x + f4, y, z + f3);
+        level->addParticle("smoke", part);
+        level->addParticle("flame", part);
     }
 }
 
 void FurnaceTile::setPlacedBy(Level* level, const TilePos& pos, Mob* mob)
 {
-    int rotation = (int)((mob->rotationYaw * 4.0f) / 360.0f + 0.5f) & 3;
+    int rotation = (int)((mob->m_rot.y * 4.0f) / 360.0f + 0.5f) & 3;
     if (rotation == 0)
     {
         level->setData(pos, 2); // South
@@ -180,19 +182,19 @@ void FurnaceTile::onRemove(Level* level, const TilePos& pos)
                 float f = level->m_random.nextFloat() * 0.8f + 0.1f;
                 float f1 = level->m_random.nextFloat() * 0.8f + 0.1f;
                 float f2 = level->m_random.nextFloat() * 0.8f + 0.1f;
-                while (item.getCount() > 0)
+                while (!item.isEmpty())
                 {
                     int count = level->m_random.nextInt(21) + 10;
-                    if (count > item.getCount())
+                    if (count > item.m_count)
                     {
-                        count = item.getCount();
+                        count = item.m_count;
                     }
-                    item.setCount(item.getCount() - count);
-                    EntityItem* entityItem = new EntityItem(level, (float)pos.x + f, (float)pos.y + f1, (float)pos.z + f2, ItemStack(item));
+                    ItemStack dropped = item.remove(count);
+                    ItemEntity* entityItem = new ItemEntity(level, Vec3((float)pos.x + f, (float)pos.y + f1, (float)pos.z + f2), dropped);
                     float f3 = 0.05f;
-                    entityItem->motionX = (float)level->m_random.nextGaussian() * f3;
-                    entityItem->motionY = (float)level->m_random.nextGaussian() * f3 + 0.2f;
-                    entityItem->motionZ = (float)level->m_random.nextGaussian() * f3;
+                    entityItem->m_vel.x = (float)level->m_random.nextGaussian() * f3;
+                    entityItem->m_vel.y = (float)level->m_random.nextGaussian() * f3 + 0.2f;
+                    entityItem->m_vel.z = (float)level->m_random.nextGaussian() * f3;
                     level->addEntity(entityItem);
                 }
             }
@@ -209,9 +211,9 @@ void FurnaceTile::tick(Level* level, const TilePos& pos, Random* random)
     {
         m_burnTime--;
     }
-    if (!level->isClientSide())
+    if (!level->m_bIsClientSide)
     {
-        if (!isBurning() && !m_items[0].isEmpty())
+        if (!isBurning() && canSmelt())
         {
             m_currentItemBurnTime = m_burnTime = FurnaceRecipes::singleton().getBurnDuration(m_items[1]);
             if (isBurning())
@@ -219,8 +221,8 @@ void FurnaceTile::tick(Level* level, const TilePos& pos, Random* random)
                 shouldUpdate = true;
                 if (!m_items[1].isEmpty())
                 {
-                    m_items[1].setCount(m_items[1].getCount() - 1);
-                    if (m_items[1].getCount() == 0)
+                    m_items[1].shrink();
+                    if (m_items[1].isEmpty())
                     {
                         m_items[1] = ItemStack::EMPTY;
                     }
@@ -255,7 +257,34 @@ void FurnaceTile::tick(Level* level, const TilePos& pos, Random* random)
 
 void FurnaceTile::updateFurnaceBlockState(bool isBurning, Level* level, const TilePos& pos)
 {
+    TileID currentTile = level->getTile(pos);
     int meta = level->getData(pos);
+
+    FurnaceTile* from = nullptr;
+    FurnaceTile* to = nullptr;
+
+    if (currentTile == Tile::furnaceIdle->m_ID)
+    {
+        from = (FurnaceTile*)Tile::furnaceIdle;
+        to = (FurnaceTile*)(isBurning ? Tile::furnaceActive : Tile::furnaceIdle);
+    }
+    else if (currentTile == Tile::furnaceActive->m_ID)
+    {
+        from = (FurnaceTile*)Tile::furnaceActive;
+        to = (FurnaceTile*)(isBurning ? Tile::furnaceActive : Tile::furnaceIdle);
+    }
+
+    if (from && to && from != to)
+    {
+        for (int i = 0; i < 3; ++i)
+        {
+            to->m_items[i] = from->m_items[i];
+        }
+        to->m_cookTime = from->m_cookTime;
+        to->m_burnTime = from->m_burnTime;
+        to->m_currentItemBurnTime = from->m_currentItemBurnTime;
+    }
+
     m_keepInventory = true;
     if (isBurning)
     {
@@ -296,7 +325,9 @@ ItemStack& FurnaceTile::getItem(int index)
     {
         return m_items[index];
     }
-    return ItemStack::EMPTY;
+
+    static ItemStack invalid = ItemStack::EMPTY;
+    return invalid;
 }
 
 ItemStack FurnaceTile::removeItem(int index, int count)
@@ -305,7 +336,7 @@ ItemStack FurnaceTile::removeItem(int index, int count)
     {
         if (!m_items[index].isEmpty())
         {
-            if (m_items[index].getCount() <= count)
+            if (m_items[index].m_count <= count)
             {
                 ItemStack item = m_items[index];
                 m_items[index] = ItemStack::EMPTY;
@@ -313,8 +344,8 @@ ItemStack FurnaceTile::removeItem(int index, int count)
             }
             else
             {
-                ItemStack item = m_items[index].split(count);
-                if (m_items[index].getCount() == 0)
+                ItemStack item = m_items[index].remove(count);
+                if (m_items[index].isEmpty())
                 {
                     m_items[index] = ItemStack::EMPTY;
                 }
@@ -330,9 +361,9 @@ void FurnaceTile::setItem(int index, const ItemStack& item)
     if (index >= 0 && index < 3)
     {
         m_items[index] = item;
-        if (!item.isEmpty() && item.getCount() > getMaxStackSize())
+        if (!item.isEmpty() && item.m_count > getMaxStackSize())
         {
-            m_items[index].setCount(getMaxStackSize());
+            m_items[index].set(getMaxStackSize());
         }
     }
 }
@@ -340,6 +371,10 @@ void FurnaceTile::setItem(int index, const ItemStack& item)
 std::string FurnaceTile::getName() const
 {
     return "Furnace";
+}
+
+void FurnaceTile::setChanged()
+{
 }
 
 bool FurnaceTile::stillValid(Player* player) const
@@ -355,11 +390,12 @@ bool FurnaceTile::isBurning() const
 
 int FurnaceTile::getBurnTimeRemainingScaled(int scale) const
 {
-    if (m_currentItemBurnTime == 0)
+    int currentItemBurnTime = m_currentItemBurnTime;
+    if (currentItemBurnTime == 0)
     {
-        m_currentItemBurnTime = 200;
+        currentItemBurnTime = 200;
     }
-    return (m_burnTime * scale) / m_currentItemBurnTime;
+    return (m_burnTime * scale) / currentItemBurnTime;
 }
 
 int FurnaceTile::getCookProgressScaled(int scale) const
@@ -369,25 +405,29 @@ int FurnaceTile::getCookProgressScaled(int scale) const
 
 void FurnaceTile::burn(Level* level, const TilePos& pos)
 {
+    (void)level;
+    (void)pos;
     // Implementation depends on the game's burning system
 }
 
 void FurnaceTile::smeltItem(Level* level, const TilePos& pos)
 {
+    (void)level;
+    (void)pos;
     if (canSmelt())
     {
-        ItemStack input = m_items[0];
-        ItemStack output = FurnaceRecipes::singleton().getItemFor(this);
+        ItemStack& input = m_items[0];
+        const ItemStack& output = FurnaceRecipes::singleton().getItemFor(this);
         if (m_items[2].isEmpty())
         {
-            m_items[2] = output.copy();
+            m_items[2] = output;
         }
         else if (m_items[2].getId() == output.getId())
         {
-            m_items[2].setCount(m_items[2].getCount() + output.getCount());
+            m_items[2].set(m_items[2].m_count + output.m_count);
         }
-        input.setCount(input.getCount() - 1);
-        if (input.getCount() == 0)
+        input.shrink();
+        if (input.isEmpty())
         {
             m_items[0] = ItemStack::EMPTY;
         }
@@ -400,7 +440,7 @@ bool FurnaceTile::canSmelt() const
     {
         return false;
     }
-    ItemStack output = FurnaceRecipes::singleton().getItemFor(this);
+    const ItemStack& output = FurnaceRecipes::singleton().getItemFor((Container*)this);
     if (output.isEmpty())
     {
         return false;
@@ -413,8 +453,8 @@ bool FurnaceTile::canSmelt() const
     {
         return false;
     }
-    int totalCount = m_items[2].getCount() + output.getCount();
-    return totalCount <= getMaxStackSize() && totalCount <= output.getMaxStackSize();
+    int totalCount = m_items[2].m_count + output.m_count;
+    return totalCount <= C_MAX_CONTAINER_STACK_SIZE && totalCount <= output.getMaxStackSize();
 }
 
 bool FurnaceTile::m_keepInventory = false;
