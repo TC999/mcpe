@@ -209,3 +209,21 @@ bool gl::supports16BitUnsignedUVs()
     return false;
 #endif
 }
+
+bool gl::supportsServerBuffers()
+{
+    static int isSupported = -1;
+    if (isSupported < 0)
+    {
+        const gl::Version& glVersion = gl::Version::singleton();
+        const std::string& glExtensions = gl::getOpenGLExtensions();
+        // OpenGL ES || OpenGL 1.5+
+        if ((glVersion.gles || glExtensions.find("GL_ARB_vertex_buffer_object") || (glVersion.major > 1 || glVersion.minor >= 5))
+#ifdef _WIN32
+             && xglVBOsBound()
+#endif
+            )
+            isSupported = 1;
+    }
+    return isSupported == 1;
+}
